@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Discover the Symbols — Christmas</title>
+<style>
+  :root{
+    --bg-deep:#7f0b1b; --bg-mid:#b21f2d; --bg-light:#fff7f5;
+    --card-bg: rgba(255,255,255,0.98);
+    --muted:#5a6b66; --accent:#0d5c3f; --gold:#f3c05a;
+    --glass-border: rgba(0,0,0,0.06); --radius:14px; --max-width:1100px;
+    --modal-gold: #fff3de;
+    --modal-rose: #fff0ee;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+    display:flex;align-items:flex-start;justify-content:center;padding:20px;
+    background: linear-gradient(180deg,var(--bg-deep) 0%, var(--bg-mid) 28%, rgba(200,40,50,0.6) 42%, var(--bg-light) 60%);
+    color:#07261b;
+  }
+  .wrap{width:100%;max-width:var(--max-width);margin:18px auto;position:relative;z-index:10}
+  .splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(0,0,0,0.45),rgba(0,0,0,0.2));z-index:60;padding:20px}
+  .splash-inner{width:100%;max-width:820px;background:linear-gradient(180deg,#fff,#fff7f5);padding:22px;border-radius:16px;box-shadow:0 18px 40px rgba(0,0,0,0.35);border:1px solid rgba(0,0,0,0.04);text-align:center}
+  .splash-title{font-size:clamp(28px,5vw,44px);color:#b21f2d;margin:0 0 6px}
+  .splash-sub{color:var(--muted);margin:0 0 14px}
+  .play-enter{background:#b21f2d;color:#fff;border:0;padding:12px 18px;border-radius:12px;font-weight:800;cursor:pointer}
+  .muted-indicator{position:fixed;right:14px;top:12px;z-index:120}
+  .mute-btn{background:rgba(255,255,255,0.9);border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:10px;cursor:pointer}
+  .santa{position:fixed;right:16px;top:12px;z-index:6;width:160px;opacity:0.12;pointer-events:none}
+  .snow{position:fixed;inset:0;z-index:3;pointer-events:none}
+  .snow i{position:absolute;top:-8%;background:white;border-radius:50%;opacity:0.95;box-shadow:0 2px 4px rgba(0,0,0,0.06);animation:fall linear infinite}
+  @keyframes fall{to{transform:translateY(120vh) translateX(30vw);opacity:0.95}}
+  .frame{margin:24px auto 80px;padding:18px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,250,248,0.98));border:1px solid var(--glass-border);box-shadow:0 12px 30px rgba(0,0,0,0.12)}
+  .page-title{display:none;font-size:26px;font-weight:800;color:#b21f2d;margin:0 0 8px;text-align:center}
+  .page-title .sub{display:block;font-size:13px;color:var(--muted);font-style:italic;font-weight:600;margin-top:6px}
+  .frame h2{margin:6px 0 6px;font-size:18px;color:#681018}
+  .intro{color:var(--muted);margin:0 0 16px;font-size:14px}
+  .grid{display:grid;gap:14px;grid-template-columns:1fr}
+  @media(min-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:1040px){.grid{grid-template-columns:repeat(3,1fr)}}
+  .card{background:var(--card-bg);padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:10px;min-height:170px;box-shadow:0 8px 18px rgba(0,0,0,0.06)}
+  .symbol-row{display:flex;gap:12px;align-items:center}
+  .symbol{width:98px;height:98px;flex:0 0 98px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(243,192,90,0.06), rgba(255,255,255,0.02));border:1px solid rgba(0,0,0,0.04)}
+  .symbol img, .symbol svg{width:84px;height:84px;object-fit:contain;display:block;border-radius:8px}
+  .card h3{margin:0;font-size:17px;color:#6b0f1a}
+  .summary{margin:0;color:var(--muted);font-size:14px}
+  .explain{margin:0;color:#123b2a;font-size:14px}
+  .ref{font-size:12px;color:var(--muted);margin-top:6px}
+  .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+  .read-btn{background:#b21f2d;color:#fff;padding:8px 12px;border-radius:9px;border:0;font-weight:700;cursor:pointer}
+  .more-btn{background:transparent;border:1px solid rgba(0,0,0,0.05);padding:8px 10px;border-radius:9px;cursor:pointer}
+  /* ---------- MODAL + BACKDROP (festive update) ---------- */
+
+  /* Backdrop: slightly warm translucent, hints of holiday red */
+  .modal-backdrop{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:90;
+    padding:18px;
+    /* subtle red-to-transparent gradient for atmosphere */
+    background:
+      radial-gradient(1200px 600px at 10% 10%, rgba(178,29,41,0.12), transparent 20%),
+      radial-gradient(1000px 500px at 90% 90%, rgba(243,192,90,0.06), transparent 25%),
+      linear-gradient(180deg, rgba(8,6,6,0.55), rgba(8,6,6,0.7));
+  }
+
+  /* Modal: warm cream -> rose gradient, faint sparkle texture and soft gold border */
+  .modal{
+    width:100%;
+    max-width:720px;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.6);
+    /* layered background: gradient base + repeating soft sparkle */
+    background-image:
+      linear-gradient(180deg, var(--modal-gold) 0%, var(--modal-rose) 55%, #fff 100%),
+      radial-gradient(circle at 10% 20%, rgba(243,192,90,0.06) 0px, transparent 8px),
+      radial-gradient(circle at 85% 80%, rgba(243,192,90,0.045) 0px, transparent 10px);
+    background-blend-mode: normal, overlay, overlay;
+    border: 1px solid rgba(180, 50, 50, 0.06);
+    color: #0f2b1f; /* dark green text for readability */
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* small decorative corner: subtle holly-like shape using pseudo element */
+  .modal::after{
+    content:'';
+    position:absolute;
+    right:-60px;
+    top:-36px;
+    width:220px;
+    height:220px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(243,192,90,0.12), transparent 6%),
+      radial-gradient(circle at 80% 80%, rgba(178,29,41,0.08), transparent 6%);
+    transform:rotate(18deg);
+    opacity:0.85;
+    pointer-events:none;
+    filter:blur(12px);
+  }
+
+  .modal h3{margin:0 0 8px;font-size:20px;color:#6b0f1a}
+  .modal .summary{font-weight:600}
+  .modal .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+  .btn-primary{background:var(--gold);color:#2b1a07;padding:10px 14px;border-radius:10px;border:0;font-weight:700}
+  .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:10px 12px;border-radius:10px}
+  footer.small{margin-top:14px;color:rgba(4,10,10,0.6);font-size:13px;text-align:center}
+  :focus{outline:3px solid rgba(255,240,210,0.22);outline-offset:2px;border-radius:8px}
+  @media(prefers-reduced-motion:reduce){.snow i{animation:none}.stars{animation:none}}
+  .sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;border:0;padding:0;margin:-1px}
+</style>
+</head>
+<body>
+  <!-- Santa decorative silhouette -->
+  <svg class="santa" viewBox="0 0 300 200" aria-hidden="true">
+    <g fill="#fff">
+      <path d="M40 130 C60 90 90 60 140 60 C180 60 200 80 220 100 C240 120 260 116 264 120 C268 124 256 134 240 138 C220 143 200 160 156 168 C112 176 68 160 40 130 Z"/>
+      <circle cx="190" cy="48" r="18"/><rect x="170" y="150" width="40" height="16" rx="6"/>
+    </g>
+  </svg>
+
+  <div class="stars" aria-hidden="true"></div>
+  <div class="snow" aria-hidden="true"></div>
+
+  <div class="muted-indicator" aria-hidden="false">
+    <button id="muteBtn" class="mute-btn" aria-pressed="false" aria-label="Mute bells">🔊 Mute</button>
+  </div>
+
+  <main class="wrap" role="main">
+    <div id="splash" class="splash" role="dialog" aria-modal="true" aria-labelledby="splashTitle">
+      <div class="splash-inner">
+        <h1 id="splashTitle" class="splash-title">Merry Christmas!</h1>
+        <p class="splash-sub">Press the button to play the bells and enter.</p>
+        <div style="margin-top:12px">
+          <button id="playEnterBtn" class="play-enter" aria-label="Play bells and enter">🔔 Play bells to Enter</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="frame" aria-labelledby="discoverTitle">
+      <div id="pageTitle" class="page-title" aria-hidden="true">
+        <div class="main">Merry Christmas!</div>
+        <div class="sub">"Peace and joy — a light for everyone"</div>
+      </div>
+
+      <h2 id="discoverTitle">Discover the Symbols</h2>
+      <p class="intro">Tap a card to read a friendly explanation. Cards show a clear headline, a quick summary, and a short explanation for easy reading.</p>
+
+      <div class="grid" id="cards" role="list">
+        <!-- 1 Star of Bethlehem -->
+        <article class="card" role="listitem" data-slug="star-of-bethlehem" aria-labelledby="t-star" data-img="Star.jpeg">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><defs><linearGradient id="g-star2" x1="0" x2="1"><stop offset="0" stop-color="#fff7e0"/><stop offset="1" stop-color="#f7d063"/></linearGradient></defs><g transform="translate(32,32)"><path d="M0,-28 L6,-6 L28,-2 L10,8 L14,28 L0,16 L-14,28 L-10,8 L-28,-2 L-6,-6 Z" fill="url(#g-star2)" stroke="#d7a73a" stroke-width="1"/></g></svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-star">Star of Bethlehem</h3>
+              <p class="summary">A guiding light that pointed the way.</p>
+              <p class="explain">A symbol of hope and guidance — a bright sign pointing toward something joyful.</p>
+              <div class="ref">Matthew 2:1–2</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="star-of-bethlehem">Read</button><button class="more-btn" aria-hidden="true">✨</button></div>
+        </article>
+
+        <!-- 2 Lamb -->
+        <article class="card" role="listitem" data-slug="lamb" aria-labelledby="t-lamb" data-img="Lamb.jpeg">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g transform="translate(4,6)" fill="#fff" stroke="#c8c8c8" stroke-width="1.5"><ellipse cx="30" cy="26" rx="18" ry="12" fill="#fff"/><circle cx="46" cy="20" r="8" fill="#fff"/><circle cx="44" cy="18" r="1.6" fill="#333"/><path d="M12 30 q-6 -8 -12 -6" stroke="#c8c8c8" fill="none"/></g></svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-lamb">Lamb — “Lamb of God”</h3>
+              <p class="summary">A gentle image of care and kindness.</p>
+              <p class="explain">The lamb stands for gentleness and the idea of someone who cares for others and keeps them safe.</p>
+              <div class="ref">John 1:29</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="lamb">Read</button><button class="more-btn" aria-hidden="true">🕊️</button></div>
+        </article>
+
+        <!-- 3 Christmas Tree -->
+        <article class="card" role="listitem" data-slug="christmas-tree" aria-labelledby="t-tree" data-img="Christmas Tree.jpeg">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g transform="translate(32,32)"><path d="M0,-28 L14,-8 L6,-8 L18,6 L-6,2 L-2,16 L-18,6 L-6,-8 L-14,-8 Z" fill="#0d5c3f"/><rect x="-6" y="18" width="12" height="10" rx="1" fill="#8b5a2b"/></g></svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-tree">Christmas Tree</h3>
+              <p class="summary">An evergreen celebrating life and family.</p>
+              <p class="explain">The evergreen is a warm tradition that reminds people of life through winter and the joy of gathering.</p>
+              <div class="ref">Tradition</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="christmas-tree">Read</button><button class="more-btn" aria-hidden="true">🌲</button></div>
+        </article>
+
+        <!-- 4 Candle / Light -->
+        <article class="card" role="listitem" data-slug="candle-light" aria-labelledby="t-candle" data-img="Candles.jpeg">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g transform="translate(32,32)"><rect x="-6" y="2" width="12" height="18" rx="2" fill="#fff9ea" stroke="#e6c57a"/><path d="M0,-12 C-4,-8 4,-8 0,-12 Z" fill="#ffd97b"/></g></svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-candle">Candle / Light</h3>
+              <p class="summary">Warmth, welcome, and guidance.</p>
+              <p class="explain">Candles remind people of warmth and the idea that light brings others together and shows the way.</p>
+              <div class="ref">John 8:12</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="candle-light">Read</button><button class="more-btn" aria-hidden="true">🕯️</button></div>
+        </article>
+
+        <!-- 5 Gifts -->
+        <article class="card" role="listitem" data-slug="gifts" aria-labelledby="t-gifts" data-img="Gifts.jpeg">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g transform="translate(32,32)"><rect x="-18" y="-6" width="36" height="24" rx="3" fill="#fff2e6" stroke="#e6c1a0"/><path d="M-10 -6 v-8 h8 v8" fill="#f3c05a"/></g></svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-gifts">Gifts</h3>
+              <p class="summary">Sharing care and joy.</p>
+              <p class="explain">Gifts are a way to show kindness and the joy of sharing with family, friends, and those in need.</p>
+              <div class="ref">Matthew 2:11</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="gifts">Read</button><button class="more-btn" aria-hidden="true">🎁</button></div>
+        </article>
+
+        <!-- 6 Cross -->
+        <article class="card" role="listitem" data-slug="cross" aria-labelledby="t-cross" data-img="Cross.jpeg">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g transform="translate(32,32)" fill="#eaeaea" stroke="#c4bdb5"><rect x="-4" y="-18" width="8" height="36" rx="2" fill="#f6f2ef"/><rect x="-18" y="-4" width="36" height="8" rx="2" fill="#f6f2ef"/></g></svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-cross">Cross</h3>
+              <p class="summary">A reminder of love and care for others.</p>
+              <p class="explain">The cross is a sign for many of self-giving love and forgiveness — important ideas in many stories.</p>
+              <div class="ref">John 19; Romans 5</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="cross">Read</button><button class="more-btn" aria-hidden="true">✝️</button></div>
+        </article>
+
+        <!-- NEW: Angel (replaces Ichthys) -->
+        <article class="card" role="listitem" data-slug="angel" aria-labelledby="t-angel" data-img="Angel.png">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <!-- simple friendly angel SVG -->
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                <g transform="translate(32,32)" fill="none" stroke="#f3c05a" stroke-width="1.6">
+                  <path d="M0,-18 c6,0 10,4 12,8 c2,4 6,6 10,6 c-4,6 -10,10 -22,10 c-12,0 -18-4 -22-10 c4,0 8-2 10-6 c2-4 6-8 12-8z" fill="#fff9ea" stroke="#e0b04d"/>
+                  <circle cx="0" cy="-12" r="4" fill="#fff7e6" stroke="#e0b04d"/>
+                </g>
+              </svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-angel">Angel</h3>
+              <p class="summary">Messengers bringing good news and peace.</p>
+              <p class="explain">Angels are friendly figures in many stories who announce good news and invite calm and celebration. They are a simple symbol of hope and kindness everyone can picture.</p>
+              <div class="ref">Luke 2:8–14</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="angel">Read</button><button class="more-btn" aria-hidden="true">🕊️</button></div>
+        </article>
+
+        <!-- 8 Dove -->
+        <article class="card" role="listitem" data-slug="dove" aria-labelledby="t-dove" data-img="Dove.jpeg">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g transform="translate(4,12)" fill="#fff" stroke="#bfcfc6" stroke-width="1"><path d="M8 20 q8 -10 24 -12 q8 2 12 8 q-6 2 -10 6 q-12 6 -26 -2z"/></g></svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-dove">Dove</h3>
+              <p class="summary">A sign of peace and new beginnings.</p>
+              <p class="explain">Doves stand for peace and hopeful new starts — a gentle image seen in many stories.</p>
+              <div class="ref">Genesis 8:11; Luke 3:22</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="dove">Read</button><button class="more-btn" aria-hidden="true">🕊️</button></div>
+        </article>
+
+        <!-- NEW: Bells (replaces Anchor) -->
+        <article class="card" role="listitem" data-slug="bells-symbol" aria-labelledby="t-bells" data-img="Bells.png">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <!-- decorative bells SVG -->
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                <g transform="translate(32,32)" fill="#fff5e6" stroke="#d49a2b" stroke-width="1.6">
+                  <path d="M-12 -4 c0 -8 6 -14 12 -14 s12 6 12 14 c0 6 4 10 4 10 h-28 s4 -4 4 -10z"/>
+                  <circle cx="-4" cy="10" r="3" fill="#f3c05a" />
+                </g>
+              </svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-bells">Bells</h3>
+              <p class="summary">Ringing to celebrate and call people together.</p>
+              <p class="explain">Bells are joyful sounds used to mark celebrations and to invite people to gather. They match the music you hear and are a friendly sign of happy times.</p>
+              <div class="ref">Tradition</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="bells-symbol">Read</button><button class="more-btn" aria-hidden="true">🔔</button></div>
+        </article>
+
+        <!-- NEW: Santa Claus (added) -->
+        <article class="card" role="listitem" data-slug="santa-claus" aria-labelledby="t-santa" data-img="Santa Claus">
+          <div class="symbol-row">
+            <div class="symbol" aria-hidden="true">
+              <!-- simple friendly Santa hat/head SVG -->
+              <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                <g transform="translate(32,32)">
+                  <path d="M-18,6 c6,-14 28,-18 36,-6 c-2,6 -10,10 -18,10 c-8,0 -18,0 -18,-4z" fill="#e53935" stroke="#b21f2d"/>
+                  <ellipse cx="10" cy="12" rx="10" ry="6" fill="#fff"/>
+                  <circle cx="-14" cy="12" r="4" fill="#fff"/>
+                </g>
+              </svg>
+            </div>
+            <div style="flex:1">
+              <h3 id="t-santa">Santa Claus</h3>
+              <p class="summary">A cheerful gift-bringer who loves surprises.</p>
+              <p class="explain">Santa Claus is a warm, playful figure in many holiday stories who brings gifts and makes children smile. He reminds people about giving, imagination, and being kind to others.</p>
+              <div class="ref">Tradition</div>
+            </div>
+          </div>
+          <div class="card-footer"><button class="read-btn" data-action="read" data-slug="santa-claus">Read</button><button class="more-btn" aria-hidden="true">🎅</button></div>
+        </article>
+
+      </div>
+
+      <footer class="small" aria-hidden="false">Need a printable PDF? Ask me.</footer>
+    </section>
+  </main>
+
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle" tabindex="-1">
+      <h3 id="modalTitle">Title</h3>
+      <p id="modalSummary" class="summary">Short summary</p>
+      <p id="modalExplain">Expanded friendly explanation.</p>
+      <div id="modalRef" class="ref">Reference</div>
+      <div class="modal-actions">
+        <button class="btn-primary" id="copyBtn">Copy text</button>
+        <button class="btn-ghost" id="closeBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  NOTE for adding your internal images:
+  - Put your image files in the SAME FOLDER as this HTML file (recommended).
+  - For each <article class="card"> above, set the data-img attribute to the filename or relative path.
+    Example: <article ... data-slug="angel" data-img="angel.png"> or data-img="images/angel.jpg"
+  - The page automatically replaces the inline SVG with your image when data-img is present.
+  - Use HTTPS absolute URLs if hosting images online, or simple filenames for local images.
+*/
+
+/* ---------------------
+  Audio config (embed your local audio file name here)
+  - If you placed your audio file next to this HTML, set EMBED_AUDIO_SRC = "bells.mp3"
+  - If you use an absolute file path, beware some browsers block file:// when opened from http(s).
+*/
+const EMBED_AUDIO_SRC = "bells.mp3"; // <-- set your audio filename placed beside this HTML (or an https:// URL)
+
+/* Audio & UI (unchanged behavior: Play to Enter, continuous playback, mute toggle) */
+const playEnterBtn = document.getElementById('playEnterBtn');
+const muteBtn = document.getElementById('muteBtn');
+const splash = document.getElementById('splash');
+const pageTitle = document.getElementById('pageTitle');
+
+let audioElement = null;
+let useFallback = false;
+let fallbackPlaying = false;
+let webAudioCtx = null;
+let masterGain = null;
+let isMuted = false;
+
+function ensureAudioElement(){
+  if(audioElement) return audioElement;
+  audioElement = document.createElement('audio');
+  audioElement.preload = 'auto';
+  audioElement.loop = true;
+  audioElement.style.display = 'none';
+  document.body.appendChild(audioElement);
+  audioElement.addEventListener('error', (e) => { console.warn('Audio element error', e); });
+  return audioElement;
+}
+
+async function tryUseEmbeddedSource(){
+  const src = (EMBED_AUDIO_SRC || "").trim();
+  if(!src) return false;
+  try{
+    const a = ensureAudioElement();
+    a.src = src;
+    return true;
+  }catch(e){
+    console.warn('Failed to set embedded audio src', e);
+    return false;
+  }
+}
+
+/* Fallback WebAudio (Jingle Bells) - looped */
+function startFallbackLoop(){
+  if(fallbackPlaying) return;
+  useFallback = true;
+  fallbackPlaying = true;
+  webAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = webAudioCtx.createGain();
+  masterGain.gain.value = isMuted ? 0.0001 : 0.12;
+  masterGain.connect(webAudioCtx.destination);
+
+  const BPM = 110;
+  const beatSec = 60 / BPM;
+  const P = {'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,'C5':523.25,'D5':587.33,'E5':659.25};
+
+  const melody = [
+    ['E4',0.5],['E4',0.5],['E4',1.0],
+    ['E4',0.5],['E4',0.5],['E4',1.0],
+    ['E4',0.5],['G4',0.5],['C5',0.5],['D5',0.5],['E5',1.5],
+    ['F4',0.5],['F4',0.5],['F4',0.5],['F4',0.5],
+    ['F4',0.5],['E4',0.5],['E4',0.5],['E4',1.0],
+    ['E4',0.5],['D4',0.5],['D4',1.0],['E4',1.0],
+    ['D4',0.5],['G4',1.5],
+    ['E4',0.5],['E4',0.5],['E4',1.0],
+    ['E4',0.5],['E4',0.5],['E4',1.0],
+    ['E4',0.5],['G4',0.5],['C5',0.5],['D5',0.5],['E5',1.5],
+    ['F4',0.5],['F4',0.5],['F4',0.5],['F4',0.5],
+    ['F4',0.5],['E4',0.5],['E4',0.5],['E4',1.0],
+    ['E4',0.5],['D4',0.5],['D4',1.0],['E4',1.0],
+    ['D4',0.5],['G4',1.5],
+    ['C5',0.5],['G4',0.5],['E4',1.5]
+  ];
+
+  function playBell(note, startTime, duration){
+    const freq = P[note] || 440;
+    const o1 = webAudioCtx.createOscillator(); o1.type='sine'; o1.frequency.value=freq;
+    const o2 = webAudioCtx.createOscillator(); o2.type='triangle'; o2.frequency.value=freq*2.003;
+    const g = webAudioCtx.createGain();
+    const noiseBuf = webAudioCtx.createBuffer(1, webAudioCtx.sampleRate * 0.12, webAudioCtx.sampleRate);
+    const data = noiseBuf.getChannelData(0);
+    for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*0.015;
+    const noise = webAudioCtx.createBufferSource(); noise.buffer = noiseBuf;
+    const nf = webAudioCtx.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=Math.min(1200,freq*2);
+    noise.connect(nf);
+    const merger = webAudioCtx.createGain();
+    o1.connect(merger); o2.connect(merger); nf.connect(merger);
+    merger.connect(g); g.connect(masterGain);
+    const attack = Math.min(0.02, duration*0.15);
+    const decay = Math.min(1.6, Math.max(0.4, duration*1.5));
+    g.gain.setValueAtTime(0.0001, startTime);
+    g.gain.exponentialRampToValueAtTime(0.12, startTime + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, startTime + attack + decay);
+    noise.start(startTime); noise.stop(startTime + Math.min(0.16, duration + 0.05));
+    o1.start(startTime); o2.start(startTime);
+    o1.stop(startTime + duration + 1.0); o2.stop(startTime + duration + 1.0);
+  }
+
+  function playPass(startTime){
+    let t = startTime;
+    for(const [note, beats] of melody){
+      if(note) playBell(note, t, beats * beatSec);
+      t += beats * beatSec;
+    }
+    return t - startTime;
+  }
+
+  let cancelled = false;
+  function scheduleNext(){
+    if(cancelled) return;
+    const now = webAudioCtx.currentTime + 0.06;
+    const dur = playPass(now);
+    setTimeout(()=> { if(!cancelled) scheduleNext(); }, Math.max(1, (dur - 0.25) * 1000));
+  }
+  scheduleNext();
+
+  startFallbackLoop.stop = () => { cancelled = true; try{ webAudioCtx && webAudioCtx.close(); webAudioCtx = null; }catch(e){} };
+}
+
+function stopFallback(){
+  if(startFallbackLoop.stop) startFallbackLoop.stop();
+  fallbackPlaying = false;
+  useFallback = false;
+}
+
+const muteBtnEl = document.getElementById('muteBtn');
+muteBtnEl.addEventListener('click', ()=>{
+  isMuted = !isMuted;
+  muteBtnEl.textContent = isMuted ? '🔇 Unmute' : '🔊 Mute';
+  muteBtnEl.setAttribute('aria-pressed', String(isMuted));
+  if(audioElement) audioElement.muted = isMuted;
+  if(masterGain) masterGain.gain.setValueAtTime(isMuted ? 0.0001 : 0.12, (webAudioCtx && webAudioCtx.currentTime) || 0);
+});
+
+playEnterBtn.addEventListener('click', async () => {
+  const embeddedSet = await tryUseEmbeddedSource();
+  const a = embeddedSet ? ensureAudioElement() : null;
+
+  if(a && a.src){
+    try{
+      await a.play();
+      a.muted = isMuted;
+      stopFallback();
+    }catch(err){
+      console.warn('Embedded audio failed to play; starting fallback. Error:', err);
+      startFallbackLoop();
+    }
+  } else {
+    startFallbackLoop();
+  }
+
+  splash.style.display = 'none';
+  pageTitle.style.display = 'block';
+  pageTitle.setAttribute('aria-hidden','false');
+  const first = document.querySelector('[data-action="read"]');
+  if(first) first.focus();
+});
+
+/* -------------------------
+  Modal & content array (NEW items added: angel, bells-symbol, santa-claus)
+  Texts follow your request (clear, kid-friendly).
+  ------------------------- */
+const ITEMS = [
+  { slug:'star-of-bethlehem', title:'Star of Bethlehem', summary:'A guiding light that pointed the way.', short:'A sign of hope and guidance.', expanded:'The Star of Bethlehem is remembered as a bright light that led visitors to a special place. It is often used as a symbol of hope — like a friendly signal that points people toward something good. For children: imagine a big, bright star showing the path to a happy surprise. For others: it is a simple picture of guidance and hope in dark times.', ref:'Matthew 2:1–2' },
+  { slug:'lamb', title:'Lamb — “Lamb of God”', summary:'A gentle image of care and kindness.', short:'A lamb reminds people of gentleness and care.', expanded:'The lamb is a quiet, gentle animal and is used to remind people about care and protection. It represents kindness, softness, and the idea of someone who looks after others. For families, the lamb image helps talk about being gentle and helping one another. The phrase "Lamb of God" is a traditional way some people describe this gentle care in stories and songs.', ref:'John 1:29' },
+  { slug:'christmas-tree', title:'Christmas Tree', summary:'An evergreen celebrating life and family.', short:'An evergreen that stands for life and gathering.', expanded:'The Christmas tree—usually an evergreen—stays green even in winter, so it quickly became a symbol of life when the weather is cold. People put lights and decorations on the tree to celebrate being together with family and friends. It is a warm, cheerful symbol of welcome and shared times, like a centerpiece where people gather to sing, exchange gifts, and enjoy each other’s company.', ref:'Tradition' },
+  { slug:'candle-light', title:'Candle / Light', summary:'Warmth, welcome, and guidance.', short:'Light shows the way and brings people together.', expanded:'Candles and light are simple, powerful images: they warm rooms and make people feel safe. As a symbol, light stands for welcoming others, showing the way when things are dark, and reminding people that small acts of kindness can brighten someone’s day. Many stories use light to say "you are seen" or "you are welcome" — which is easy to understand for all ages.', ref:'John 8:12' },
+  { slug:'gifts', title:'Gifts', summary:'Sharing care and joy.', short:'Gifts represent kindness and giving to others.', expanded:'Giving gifts is a simple and joyful way to show someone you care. The act of giving can be big or small — a homemade card, a shared meal, or a toy — and it signals thoughtfulness and generosity. Gifts remind people to think of others, to practice sharing, and to celebrate the joy of making someone else smile.', ref:'Matthew 2:11' },
+  { slug:'cross', title:'Cross', summary:'A reminder of love and care for others.', short:'A sign of self-giving love for many people.', expanded:'The cross is a symbol used by many people to remember the idea of self-giving love and the importance of forgiveness and helping others. For some, it recalls stories about caring that ask people to think of others first. Even for those who do not share the same stories, the cross can be understood as a picture of putting love and concern at the center of life.', ref:'John 19; Romans 5' },
+  { slug:'angel', title:'Angel', summary:'Messengers bringing good news and peace.', short:'Angels share messages of hope and joy.', expanded:'Angels are friendly figures in many stories who announce good news and invite calm and celebration. They are a simple symbol of hope and kindness that people of all ages can picture and enjoy.', ref:'Luke 2:8–14' },
+  { slug:'dove', title:'Dove', summary:'A sign of peace and new beginnings.', short:'A dove stands for peace and hope.', expanded:'The dove is a gentle bird often used to show peace, calm, and a fresh start. When a dove appears in stories, it often brings a message of calm after trouble, or a promise of something new and hopeful ahead. The image is simple and friendly — easy for children to picture — and encourages people to think about peace in their homes and neighborhoods.', ref:'Genesis 8:11; Luke 3:22' },
+  { slug:'bells-symbol', title:'Bells', summary:'Ringing to celebrate and call people together.', short:'Bells announce celebrations and invite people to gather.', expanded:'Bells are joyful sounds used to mark celebrations and to invite people to gather together. They match the music in this page and are a friendly symbol of happy times and community.', ref:'Tradition' },
+  { slug:'santa-claus', title:'Santa Claus', summary:'A cheerful gift-bringer who loves surprises.', short:'A jolly figure who shares gifts and joy.', expanded:'Santa Claus is a warm, playful figure in many holiday stories who brings gifts and makes children smile. He reminds people about giving, imagination, and kindness during the season — a fun and friendly part of many celebrations.', ref:'Tradition' }
+];
+
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modal = modalBackdrop.querySelector('.modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalSummary = document.getElementById('modalSummary');
+const modalExplain = document.getElementById('modalExplain');
+const modalRef = document.getElementById('modalRef');
+const copyBtn = document.getElementById('copyBtn');
+const closeBtn = document.getElementById('closeBtn');
+let lastFocused = null;
+
+document.addEventListener('click', (e)=>{
+  const r = e.target.closest('[data-action="read"]');
+  if(r){
+    lastFocused = r;
+    openModal(r.dataset.slug);
+  }
+});
+
+function findItem(slug){ return ITEMS.find(it => it.slug === slug); }
+function openModal(slug){
+  const item = findItem(slug); if(!item) return;
+  modalTitle.textContent = item.title;
+  modalSummary.textContent = item.summary;
+  modalExplain.textContent = item.expanded || item.short || item.summary;
+  modalRef.textContent = item.ref || '';
+  modalBackdrop.style.display = 'flex';
+  modalBackdrop.setAttribute('aria-hidden','false');
+  try{ history.replaceState(null,'', '#item=' + encodeURIComponent(slug)); }catch(e){ location.hash = 'item=' + encodeURIComponent(slug); }
+  closeBtn.focus(); document.addEventListener('keydown', handleKeydown); trapFocus(modalBackdrop);
+}
+function closeModal(restoreFocus=true){
+  modalBackdrop.style.display = 'none';
+  modalBackdrop.setAttribute('aria-hidden','true');
+  try{ history.replaceState(null,'', location.pathname + location.search); }catch(e){ location.hash = ''; }
+  document.removeEventListener('keydown', handleKeydown);
+  releaseFocusTrap();
+  if(restoreFocus && lastFocused) lastFocused.focus();
+}
+closeBtn.addEventListener('click', ()=> closeModal(true));
+modalBackdrop.addEventListener('click', (e)=> { if(e.target === modalBackdrop) closeModal(true); });
+function handleKeydown(e){ if(e.key === 'Escape') closeModal(true); }
+let trapListener = null;
+function trapFocus(container){
+  const focusables = Array.from(container.querySelectorAll('button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])')).filter(n => !n.disabled);
+  if(!focusables.length) return; const first = focusables[0], last = focusables[focusables.length-1];
+  trapListener = function(e){
+    if(e.key !== 'Tab') return;
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  };
+  container.addEventListener('keydown', trapListener);
+}
+function releaseFocusTrap(){ if(trapListener) modalBackdrop.removeEventListener('keydown', trapListener); trapListener = null; }
+
+copyBtn.addEventListener('click', async ()=>{
+  const slug = (location.hash.match(/item=([^&]+)/) || [])[1];
+  const item = findItem(decodeURIComponent(slug || '')) || { title: modalTitle.textContent, summary: modalSummary.textContent, short: modalExplain.textContent, ref: modalRef.textContent };
+  const signText = `${item.title} — ${item.summary}\n${item.short || ''}\n${item.ref ? item.ref : ''}`;
+  await copyText(signText.trim()); flash(copyBtn, 'Copied!');
+});
+function flash(el,msg){ const orig = el.textContent; el.textContent = msg; setTimeout(()=> el.textContent = orig, 1200); }
+async function copyText(text){ if(navigator.clipboard && navigator.clipboard.writeText){ try{ await navigator.clipboard.writeText(text); return; }catch(e){} } const ta = document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); }
+document.querySelectorAll('[data-action="read"]').forEach(btn=>{ btn.tabIndex = 0; btn.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); } }); });
+
+function getCurrentHashSlug(){ const h = location.hash || ''; const m = h.match(/item=([^&]+)/); return m ? decodeURIComponent(m[1]) : null; }
+window.addEventListener('load', ()=>{
+  const s = getCurrentHashSlug();
+  if(s){ splash.style.display = 'none'; pageTitle.style.display = 'block'; pageTitle.setAttribute('aria-hidden','false'); openModal(s); }
+});
+window.addEventListener('hashchange', ()=>{ const s = getCurrentHashSlug(); if(s) openModal(s); else closeModal(false); });
+
+(function makeSnow(){ const container = document.querySelector('.snow'); const count=36; for(let i=0;i<count;i++){ const el=document.createElement('i'); const size=Math.round(4+Math.random()*10); el.style.width=el.style.height=size+'px'; el.style.left=Math.round(Math.random()*100)+'vw'; el.style.animationDuration=(8+Math.random()*14)+'s'; el.style.animationDelay=-(Math.random()*20)+'s'; el.style.opacity=0.5+Math.random()*0.5; container.appendChild(el);} })();
+
+/* Replace inline SVG with external image if data-img attribute is set on the <article> */
+(function replaceSymbolsFromData(){ const cards = document.querySelectorAll('.card'); cards.forEach(card=>{ const url=(card.getAttribute('data-img')||'').trim(); if(!url) return; try{ const symbolDiv = card.querySelector('.symbol'); if(!symbolDiv) return; const img=document.createElement('img'); img.src=url; img.alt = card.querySelector('h3') ? card.querySelector('h3').textContent + ' symbol' : 'symbol'; img.loading='lazy'; img.decoding='async'; img.style.width='84px'; img.style.height='84px'; img.style.objectFit='contain'; symbolDiv.innerHTML=''; symbolDiv.appendChild(img);}catch(e){console.warn('Failed to load image',e)} }); })();
+</script>
+</body>
+</html>
